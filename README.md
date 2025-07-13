@@ -2,7 +2,7 @@
 
 ---
 
-# SYN-ACK 데이터 전송 시뮬레이터 🤝
+# SYN-ACK 이진수 데이터 전송 게임 🤝
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Status: Completed](https://img.shields.io/badge/Status-Completed-brightgreen)](https://github.com/your-username/your-repo-name)
