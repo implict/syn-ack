@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- 공유 시 표시될 정보 (오픈그래프 태그) -->
+    <meta property="og:title" content="SYN-ACK">
+    <meta property="og:description" content="SYN-ACK 개념을 바탕으로 한 간단한 게임입니다.">
+    <meta property="og:type" content="website">
+
+    <title>SYN-ACK</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+
+    <div class="w-full max-w-md mx-auto bg-white rounded-xl shadow-lg p-8 text-center">
+        
+        <!-- 제목 -->
+        <h1 id="title" class="text-3xl font-bold text-gray-800 mb-2">SYN-ACK</h1>
+        
+        <!-- 안내 메시지 -->
+        <p id="message" class="text-lg text-gray-600 mb-6">전송할 숫자나 문자를 입력하세요.</p>
+        
+        <!-- 입력 필드 -->
+        <input type="text" id="userInput" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-center text-xl focus:outline-none focus:border-blue-500 transition-colors duration-300" placeholder="여기에 입력...">
+        
+        <!-- 버튼 컨테이너 -->
+        <div class="mt-6 flex flex-col sm:flex-row gap-3">
+            <!-- 제출 버튼 -->
+            <button id="submitButton" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg text-xl transition-all transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300">
+                전송하기(SYN)
+            </button>
+            <!-- 초기화 버튼 (기본적으로 숨김) -->
+            <button id="resetButton" class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg text-xl transition-all transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-gray-300 hidden">
+                새로운 연결
+            </button>
+        </div>
+
+        <!-- 결과 메시지 -->
+        <div id="result" class="mt-6 h-10 text-2xl font-bold"></div>
+
+    </div>
+
+    <script>
+        // --- 상태 변수 및 요소 가져오기 ---
+        // 'SETTING': 문제 설정, 'GUESSING': 정답 맞추기, 'SUCCESS': 정답 맞춘 상태
+        let gameState = 'SETTING'; 
+        let correctAnswer = '';
+
+        const messageElement = document.getElementById('message');
+        const userInputElement = document.getElementById('userInput');
+        const submitButtonElement = document.getElementById('submitButton');
+        const resetButtonElement = document.getElementById('resetButton');
+        const resultElement = document.getElementById('result');
+
+        // --- 이벤트 리스너 설정 ---
+        submitButtonElement.addEventListener('click', handleButtonClick);
+        resetButtonElement.addEventListener('click', resetGame);
+        userInputElement.addEventListener('keyup', function(event) {
+            if (event.key === 'Enter') {
+                handleButtonClick();
+            }
+        });
+
+        // --- 핵심 로직 함수 ---
+        function handleButtonClick() {
+            const currentValue = userInputElement.value;
+
+            // 입력값이 비어있으면 메시지 표시 후 종료
+            if (!currentValue) {
+                showTemporaryMessage('입력 필드가 비어있습니다.', 'text-red-500', 2000);
+                return;
+            }
+
+            if (gameState === 'SETTING') {
+                // 1. 문제 설정 단계
+                correctAnswer = currentValue;
+                gameState = 'GUESSING';
+                updateUIForGuessing();
+            } else if (gameState === 'GUESSING') {
+                // 2. 정답 맞추기 단계
+                if (currentValue === correctAnswer) {
+                    // 정답일 경우
+                    gameState = 'SUCCESS';
+                    updateUIForSuccess();
+                } else {
+                    // 오답일 경우
+                    showTemporaryMessage('실패! 다시 도전하세요.', 'text-red-500', 2000);
+                }
+            }
+            
+            // 입력 필드는 항상 비워주고 포커스
+            userInputElement.value = '';
+            userInputElement.focus();
+        }
+
+        // --- 게임 초기화 함수 ---
+        function resetGame() {
+            gameState = 'SETTING';
+            correctAnswer = '';
+            updateUIForSetting();
+            userInputElement.value = '';
+            userInputElement.disabled = false; // 입력 필드 활성화
+            userInputElement.focus();
+            resultElement.textContent = '';
+            resultElement.className = 'mt-6 h-10 text-2xl font-bold';
+        }
+
+        // --- UI 업데이트 함수들 ---
+        function updateUIForGuessing() {
+            messageElement.textContent = '수신한 값을 입력하세요!';
+            submitButtonElement.textContent = '응답하기(ACK)';
+            submitButtonElement.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+            submitButtonElement.classList.add('bg-green-500', 'hover:bg-green-600');
+            resetButtonElement.classList.remove('hidden'); // 초기화 버튼 보이기
+        }
+        
+        function updateUIForSuccess() {
+            messageElement.textContent = '전송이 완료되었습니다.'; // 안내 메시지 변경
+            resultElement.textContent = '성공! 정답입니다.';
+            resultElement.className = 'mt-6 h-10 text-2xl font-bold text-green-500';
+            userInputElement.disabled = true; // 입력 필드 비활성화
+            submitButtonElement.classList.add('hidden'); // '응답하기(ACK)' 버튼 숨기기
+        }
+
+        function updateUIForSetting() {
+            messageElement.textContent = '새로운 값을 전송해주세요.';
+            submitButtonElement.textContent = '전송하기(SYN)'; // 버튼 텍스트 일관성 유지
+            submitButtonElement.classList.remove('bg-green-500', 'hover:bg-green-600', 'hidden');
+            submitButtonElement.classList.add('bg-blue-500', 'hover:bg-blue-600');
+            resetButtonElement.classList.add('hidden'); // 초기화 버튼 숨기기
+        }
+
+        // --- 임시 메시지 표시 함수 ---
+        function showTemporaryMessage(message, colorClass, duration) {
+            resultElement.textContent = message;
+            resultElement.className = `mt-6 h-10 text-2xl font-bold ${colorClass}`;
+            
+            setTimeout(() => {
+                if (resultElement.textContent === message) {
+                    resultElement.textContent = '';
+                    resultElement.className = 'mt-6 h-10 text-2xl font-bold';
+                }
+            }, duration);
+        }
+
+        // 초기 포커스 설정
+        userInputElement.focus();
+    </script>
+
+</body>
+</html>
